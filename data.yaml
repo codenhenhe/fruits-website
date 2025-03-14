@@ -1,0 +1,18 @@
+names:
+- Apple
+- Avocado
+- Banana
+- Cherry
+- Dragon_fruit
+- Kiwi
+- Mango
+- Orange
+- Pear
+- Pineapple
+- Strawberry
+- Sugar_apple
+- Watermelon
+nc: 13
+test: D:\hoc_tap\Year_3_semester_2_2024_2025\NLCSN_KHMT\Project\Dataset\test
+train: D:\hoc_tap\Year_3_semester_2_2024_2025\NLCSN_KHMT\Project\Dataset\train
+val: D:\hoc_tap\Year_3_semester_2_2024_2025\NLCSN_KHMT\Project\Dataset\val
