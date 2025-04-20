@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, File, UploadFile
 from .database import engine, get_session
-from .models import Base, Origin, Fruit, HealthBenefit, Nutrition, FruitAvailabilityInVietnam, RegionInVietnam, Category, FruitCategory
+from .models import Base, Origin, Fruit, FruitImage, RegionInVietnam, Availability, Category, Benefit, FruitBenefit, Nutrition, NutritionCategory, FruitCategory, FruitOrigin, Month, AvailableMonth, NutritionUnit
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,7 +10,8 @@ import cv2
 from .schemas import FruitResponse
 import logging
 from sqlalchemy.orm import selectinload
-from typing import Optional
+from typing import Optional, List
+from pydantic import BaseModel
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,105 +67,181 @@ async def detect_fruit(file: UploadFile = File(...)):
 async def root():
     return {"message": "Hello World"}
 
-@app.get("/origin/")
-async def search_origins(id: int = None, db: AsyncSession = Depends(get_session)):
+# @app.get("/origin/")
+# async def search_origins(id: int = None, db: AsyncSession = Depends(get_session)):
+#     try:
+#         query = select(Origin)
+#         logger.info(f"Querying with id: {id}")
+#         if id is not None:
+#             query = query.filter(Origin.origin_id == id)
+#         result = await db.execute(query)
+#         origins = result.scalars().all()
+#         logger.info(f"Found origins: {[o.to_dict() for o in origins]}")  # Log dữ liệu tìm thấy
+#         if not origins:
+#             raise HTTPException(status_code=404, detail="No origins found")
+#         return {"status": "success", "total": len(origins), "data": [origin.to_dict() for origin in origins]}
+#     except Exception as e:
+#         logger.error(f"Error: {str(e)}")
+#         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.get("/fruits")
+async def search_fruits(name: str = "", db: AsyncSession = Depends(get_session)):
     try:
-        query = select(Origin)
-        logger.info(f"Querying with id: {id}")
-        if id is not None:
-            query = query.filter(Origin.origin_id == id)
+        query = select(Fruit)
+        if name:
+            query = query.filter(Fruit.fruit_name.ilike(f"%{name.lower()}%"))
+
         result = await db.execute(query)
-        origins = result.scalars().all()
-        logger.info(f"Found origins: {[o.to_dict() for o in origins]}")  # Log dữ liệu tìm thấy
-        if not origins:
-            raise HTTPException(status_code=404, detail="No origins found")
-        return {"status": "success", "total": len(origins), "data": [origin.to_dict() for origin in origins]}
+        fruits = result.scalars().all()
+
+        return {"data": [fruit.to_dict() for fruit in fruits]}
     except Exception as e:
-        logger.error(f"Error: {str(e)}")
+        logger.error(f"Error in search_fruits: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-
-# @app.get("/fruits")
-# async def search_fruits(name: str = "", db: AsyncSession = Depends(get_session)):
+# @app.get("/categories")
+# async def search_fruits(category_id: Optional[int] = None, db: AsyncSession = Depends(get_session)):
 #     try:
-#         query = select(Fruit)
-#         if name:
-#             query = query.filter(Fruit.fruit_name.ilike(f"%{name.lower()}%"))
+#         query = select(Category)
+#         if category_id:
+#             query = query.filter(Category.category_id == category_id)
 
 #         result = await db.execute(query)
-#         fruits = result.scalars().all()
-
-#         # if not fruits:
-#         #     raise HTTPException(status_code=404, detail="No fruits found")
-
-#         return {"data": [fruit.to_dict() for fruit in fruits]}
+#         cate = result.scalars().all()
+#         return {"categories": cate}
 #     except Exception as e:
-#         logger.error(f"Error in search_fruits: {str(e)}")
+#         logger.error(f"Error in search_categories: {str(e)}")
 #         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-    
+
 @app.get("/get-fruit-info", response_model=FruitResponse)
-async def get_fruit_info(fruit_id: int, db: AsyncSession = Depends(get_session)):
-    # Truy vấn Fruit với tất cả các mối quan hệ
-    stmt = (
-        select(Fruit)
-        .options(
-            selectinload(Fruit.images),  # Tải images
-            selectinload(Fruit.benefits),  # Tải benefits
-            selectinload(Fruit.categories),  # Tải categories
-        )
-        .where(Fruit.fruit_id == fruit_id)
-    )
-    result = await db.execute(stmt)
-    fruit = result.scalars().first()
-
-    if not fruit:
-        raise HTTPException(status_code=404, detail="Fruit not found")
-
-    # Lấy thông tin Nutrition
-    nutrition_stmt = select(Nutrition).where(Nutrition.fruit_id == fruit_id)
-    nutrition_result = await db.execute(nutrition_stmt)
-    nutrition = nutrition_result.scalars().all()
-
-    # Lấy thông tin Availability và join với RegionInVietnam
-    availability_stmt = (
-        select(FruitAvailabilityInVietnam, RegionInVietnam)
-        .join(RegionInVietnam, FruitAvailabilityInVietnam.riv_id == RegionInVietnam.region_id)
-        .where(FruitAvailabilityInVietnam.fruit_id == fruit_id)
-    )
-    availability_result = await db.execute(availability_stmt)
-    availability = availability_result.all()
-
-    # Xây dựng response
-    response = {
-        "fruit_id": fruit.fruit_id,
-        "fruit_name": fruit.fruit_name,
-        "scientific_name": fruit.scientific_name,
-        "description": fruit.description,
-        "images": [{"image_id": img.image_id, "image_url": img.image_url, "description": img.description} for img in fruit.images],
-        "benefits": [{"benefit_id": b.benefit_id, "benefit": b.benefit, "description": hb.description} 
-                     for b, hb in [(b, (await db.execute(select(HealthBenefit).filter_by(fruit_id=fruit.fruit_id, benefit_id=b.benefit_id))).scalars().first()) 
-                                   for b in fruit.benefits]],
-        "nutrition": [{"id": n.id, "category": n.category, "nutrient_name": n.nutrient_name, "amount": n.amount, "daily_value": n.daily_value} 
-                      for n in nutrition],
-        "availability": [{"region_name": region.region_name, "month": avail.month, "is_year_round": avail.is_year_round} 
-                         for avail, region in availability],
-        # "categories": "hello",
-        "categories": [{"category_id": cate.category_id, "category_name": cate.category_name, "description": cate.description} 
-                        for cate in fruit.categories],
-    }
-
-    return response
-
-@app.get("/categories")
-async def search_fruits(category_id: Optional[int] = None, db: AsyncSession = Depends(get_session)):
+async def get_fruit(id: Optional[int] = None, db: AsyncSession = Depends(get_session)):
     try:
-        query = select(Category)
-        if category_id:
-            query = query.filter(Category.category_id == category_id)
+        stmt = (
+            select(Fruit)
+            .options(
+                selectinload(Fruit.images),
+                selectinload(Fruit.benefits),
+                selectinload(Fruit.categories),
+                selectinload(Fruit.origins),
+                selectinload(Fruit.availabilities).selectinload(Availability.region),
+                selectinload(Fruit.availabilities).selectinload(Availability.months),
+                selectinload(Fruit.nutritions).selectinload(Nutrition.unit),
+                selectinload(Fruit.nutritions).selectinload(Nutrition.nu_category)
+            )
+            .filter(Fruit.fruit_id == id)
+        )
+        result = await db.execute(stmt)
+        fruit = result.scalars().first()
+        
+        if not fruit:
+            raise HTTPException(status_code=404, detail="Fruit not found")
+        
+        return fruit  # Trả về đối tượng Fruit trực tiếp, FastAPI sẽ tự động chuyển đổi nó sang FruitResponse
+    except Exception as e:
+        logger.error(f"Error in search_fruit: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+class FruitResponse(BaseModel):
+    fruit_id: int
+    fruit_name: str
+
+    class Config:
+        orm_mode = True
+
+class FilterFruitsResponse(BaseModel):
+    data: List[FruitResponse]
+    message: Optional[str] = None
+
+@app.get("/filter-fruits", response_model=FilterFruitsResponse)
+async def filter_fruits(
+    region: Optional[str] = None,
+    origin: Optional[str] = None,
+    benefit: Optional[str] = None,
+    category: Optional[str] = None,
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        
+        query = select(Fruit).distinct()
+
+        # region
+        if region:
+            query = query.join(Availability, Availability.fruit_id == Fruit.fruit_id)\
+                        .join(RegionInVietnam, RegionInVietnam.riv_id == Availability.riv_id)\
+                        .filter(RegionInVietnam.riv_name.ilike(f"%{region}%"))
+
+        # origin
+        if origin:
+            query = query.join(FruitOrigin, FruitOrigin.fruit_id == Fruit.fruit_id)\
+                        .join(Origin, Origin.origin_id == FruitOrigin.origin_id)\
+                        .filter(Origin.origin_name.ilike(f"%{origin}%"))
+
+        # benefit
+        if benefit:
+            query = query.join(FruitBenefit, FruitBenefit.fruit_id == Fruit.fruit_id)\
+                        .join(Benefit, Benefit.benefit_id == FruitBenefit.benefit_id)\
+                        .filter(Benefit.benefit_name.ilike(f"%{benefit}%"))
+
+        # category
+        if category:
+            query = query.join(FruitCategory, FruitCategory.fruit_id == Fruit.fruit_id)\
+                        .join(Category, Category.category_id == FruitCategory.category_id)\
+                        .filter(Category.category_name.ilike(f"%{category}%"))
 
         result = await db.execute(query)
-        cate = result.scalars().all()
-        return {"categories": cate}
+        fruits = result.scalars().all()
+
+        if not fruits:
+            return {
+                "data": [],
+                "message": "No fruits found matching the filters"
+            }
+
+        return {"data": fruits}
     except Exception as e:
-        logger.error(f"Error in search_categories: {str(e)}")
+        logger.error(f"Error in filter_fruits: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+# Endpoint lấy danh sách regions
+@app.get("/regions")
+async def get_regions(db: AsyncSession = Depends(get_session)):
+    try:
+        result = await db.execute(select(RegionInVietnam.riv_name))
+        regions = [row[0] for row in result.fetchall()]
+        return {"regions": regions}
+    except Exception as e:
+        logger.error(f"Error in get_regions: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+# Endpoint lấy danh sách origins
+@app.get("/origins")
+async def get_origins(db: AsyncSession = Depends(get_session)):
+    try:
+        result = await db.execute(select(Origin.origin_name))
+        origins = [row[0] for row in result.fetchall()]
+        return {"origins": origins}
+    except Exception as e:
+        logger.error(f"Error in get_origins: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+# Endpoint lấy danh sách benefits
+@app.get("/benefits")
+async def get_benefits(db: AsyncSession = Depends(get_session)):
+    try:
+        result = await db.execute(select(Benefit.benefit_name))
+        benefits = [row[0] for row in result.fetchall()]
+        return {"benefits": benefits}
+    except Exception as e:
+        logger.error(f"Error in get_benefits: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+@app.get("/categories")
+async def get_categories(db: AsyncSession = Depends(get_session)):
+    try:
+        result = await db.execute(select(Category.category_name))
+        categories = [row[0] for row in result.fetchall()]
+        return {"categories": categories} 
+    except Exception as e:
+        logger.error(f"Error in get_categories: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")

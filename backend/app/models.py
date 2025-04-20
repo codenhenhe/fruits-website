@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, CheckConstraint, UniqueConstraint, Table
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, CheckConstraint, UniqueConstraint, DECIMAL
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -6,128 +6,145 @@ Base = declarative_base()
 
 # Bảng Origin (Nguồn gốc trái cây)
 class Origin(Base):
-    __tablename__ = "origins"
+    __tablename__ = "origin"
 
     origin_id = Column(Integer, primary_key=True, index=True)
-    origin_name = Column(Text, nullable=False)
+    origin_name = Column(String(50), nullable=False)
+
+    fruits = relationship("Fruit", secondary="fruit_origin", back_populates="origins")
+
+class Fruit(Base):
+    __tablename__ = "fruit"
+
+    fruit_id = Column(Integer, primary_key=True, index=True)
+    fruit_name = Column(String(50), unique=True, nullable=False)
+    fruit_scientificname = Column(String(50), unique=True, nullable=False)
+    fruit_description = Column(Text, nullable=True)
+
+    images = relationship("FruitImage", back_populates="fruit", cascade="all, delete")
+    benefits = relationship("Benefit", secondary="fruit_benefit", back_populates="fruits")
+    categories = relationship("Category", secondary="fruit_category", back_populates="fruits")
+    origins = relationship("Origin", secondary="fruit_origin", back_populates="fruits")
+    availabilities = relationship("Availability", back_populates="fruit")
+    nutritions = relationship("Nutrition", back_populates="fruit")
 
     def to_dict(self):
-        return {"id": self.origin_id, "name": self.origin_name}
+        return {
+            "fruit_id": self.fruit_id,
+            "fruit_name": self.fruit_name,
+        }
 
-# Bảng Fruit (Trái cây)
-class Fruit(Base):
-    __tablename__ = "FRUIT"
-
-    FRUIT_ID = Column(Integer, primary_key=True, index=True)
-    FRUIT_Name = Column(String(50), unique=True, nullable=False)
-    FRUIT_ScientificName = Column(String(50), unique=True, nullable=False)
-    FRUIT_Description = Column(Text, nullable=True)
-
-    images = relationship("FruitImage", back_populates="FRUIT")
-    benefits = relationship("Benefit", secondary="FRUIT_BENEFIT",back_populates="FRUIT")
-    categories = relationship("Category", secondary="FRUIT_CATEGORY",back_populates="FRUIT")
-    origins = relationship("Origin", secondary="FRUIT_ORIGIN",back_populates="FRUIT")
-    availability = relationship("Availability", back_populates="FRUIT")
-    nutritions = relationship("Nutrition", back_populates="FRUIT")
-
-    # def to_dict(self):
-    #     return {
-    #         "id": self.fruit_id, 
-    #         "name": self.fruit_name, 
-    #         "scientific_name": self.scientific_name,
-    #         "description": self.description
-    #         }
-
-# Bảng lưu ảnh trái cây
 class FruitImage(Base):
-    __tablename__ = "FRUIT_IMAGE"
+    __tablename__ = "fruit_image"
     
-    FI_ID = Column(Integer, primary_key=True, index=True)
-    FRUIT_ID = Column(Integer, ForeignKey("fruit.FRUIT_ID"), ondelete='CASCADE')
-    FI_Path = Column(Text, nullable=False)
+    fi_id = Column(Integer, primary_key=True, index=True)
+    fruit_id = Column(Integer, ForeignKey("fruit.fruit_id", ondelete='CASCADE'))
+    fi_path = Column(Text, nullable=False)
 
     fruit = relationship("Fruit", back_populates="images")
 
-# Bảng Vùng miền ở Việt Nam
 class RegionInVietnam(Base):
-    __tablename__ = "regions_in_vietnam"
+    __tablename__ = "region_in_vietnam"
 
-    region_id = Column(Integer, primary_key=True, index=True)
-    region_name = Column(String(10), nullable=False)
+    riv_id = Column(Integer, primary_key=True, index=True)
+    riv_name = Column(String(10), nullable=False)
 
-# Bảng Trái cây có sẵn theo mùa ở các vùng miền
-class FruitAvailabilityInVietnam(Base):
-    __tablename__ = "fruits_availability_in_vietnam"
+    availabilities = relationship("Availability", back_populates="region")
 
-    id = Column(Integer, primary_key=True, index=True)
-    fruit_id = Column(Integer, ForeignKey("fruits.fruit_id"), nullable=False)
-    riv_id = Column(Integer, ForeignKey("regions_in_vietnam.region_id"), nullable=False)
-    month = Column(Integer, nullable=True)
-    is_year_round = Column(Boolean, default=False, nullable=False)
-
-    __table_args__ = (
-        UniqueConstraint("fruit_id", "riv_id", "month"),
-        CheckConstraint("(is_year_round = TRUE AND month IS NULL) OR (is_year_round = FALSE AND month IS NOT NULL)", 
-                        name="check_year_round_validity"),
-    )
-
-# Bảng Category (Danh mục trái cây)
-class Category(Base):
-    __tablename__ = "categories"
-
-    category_id = Column(Integer, primary_key=True, index=True)
-    category_name = Column(String(100), unique=True, nullable=False)
-    description = Column(Text, nullable=True)
+class Availability(Base):
+    __tablename__ = "availability"
     
-    # Quan hệ nhiều-nhiều với Fruits
-    fruits = relationship("Fruit", secondary="fruit_categories", back_populates="categories")
+    availability_id = Column(Integer, primary_key=True, index=True)
+    riv_id = Column(Integer, ForeignKey("region_in_vietnam.riv_id"), nullable=False)
+    fruit_id = Column(Integer, ForeignKey("fruit.fruit_id"), nullable=False)
+    availability_isyearround = Column(Boolean, default=False, nullable=False)
 
-# Bảng Benefit (Lợi ích sức khỏe của trái cây)
+    fruit = relationship("Fruit", back_populates="availabilities")
+    region = relationship("RegionInVietnam", back_populates="availabilities")
+    months = relationship("Month", secondary="available_month", back_populates="availabilities")
+
+class Category(Base):
+    __tablename__ = "category"
+    
+    category_id = Column(Integer, primary_key=True, index=True)
+    category_name = Column(String(50), unique=True, nullable=False)
+    category_description = Column(Text, nullable=True)
+
+    fruits = relationship("Fruit", secondary="fruit_category", back_populates="categories")
+
 class Benefit(Base):
-    __tablename__ = "benefits"
+    __tablename__ = "benefit"
 
     benefit_id = Column(Integer, primary_key=True, index=True)
-    benefit = Column(Text, nullable=False)
+    benefit_name = Column(Text, nullable=False)
 
-    # Quan hệ nhiều-nhiều với Fruits
-    fruits = relationship("Fruit", secondary="health_benefits", back_populates="benefits")
+    fruits = relationship("Fruit", secondary="fruit_benefit", back_populates="benefits")
 
-# Bảng trung gian Health Benefits (Trái cây và lợi ích sức khỏe)
-class HealthBenefit(Base):
-    __tablename__ = "health_benefits"
+class FruitBenefit(Base):
+    __tablename__ = "fruit_benefit"
 
-    fruit_id = Column(Integer, ForeignKey("fruits.fruit_id", ondelete="CASCADE"), primary_key=True)
-    benefit_id = Column(Integer, ForeignKey("benefits.benefit_id", ondelete="CASCADE"), primary_key=True)
-    description = Column(Text, nullable=True)
+    fruit_id = Column(Integer, ForeignKey("fruit.fruit_id", ondelete="CASCADE"), primary_key=True)
+    benefit_id = Column(Integer, ForeignKey("benefit.benefit_id", ondelete="CASCADE"), primary_key=True)
 
-# Bảng Nutrition (Dinh dưỡng của trái cây)
 class Nutrition(Base):
     __tablename__ = "nutrition"
 
-    id = Column(Integer, primary_key=True, index=True)
-    fruit_id = Column(Integer, ForeignKey("fruits.fruit_id", ondelete="CASCADE"), nullable=False)
-    category = Column(Text, nullable=False)       # Nhóm dinh dưỡng (Energy, Carbohydrates, Vitamins, ...)
-    nutrient_name = Column(Text, nullable=False)  # Tên chất dinh dưỡng (Vitamin C, Calcium, ...)
-    amount = Column(Text, nullable=False)         # Lượng dinh dưỡng (36.4 mg, 11 mg, ...)
-    daily_value = Column(Text, nullable=True)     # % giá trị hàng ngày (44%)
+    nutrition_id = Column(Integer, primary_key=True, index=True)
+    fruit_id = Column(Integer, ForeignKey("fruit.fruit_id"), nullable=False)
+    nutrition_nutrientname = Column(Text, nullable=False)
+    nutrition_amountvalue = Column(DECIMAL(6, 2), nullable=False)
+    nutrition_dailyvaluepercent = Column(DECIMAL(5, 2), nullable=False)
+    nu_id = Column(Integer, ForeignKey("nutrition_unit.nu_id"), nullable=False)
+    nc_id = Column(Integer, ForeignKey("nutrition_category.nc_id"), nullable=False)
 
-# Bảng trung gian Health Benefits (Trái cây và lợi ích sức khỏe)
+    fruit = relationship("Fruit", back_populates="nutritions")
+    unit = relationship("NutritionUnit", back_populates="nutritions")
+    nu_category = relationship("NutritionCategory", back_populates="nutritions")
+
+class NutritionCategory(Base):
+    __tablename__ = "nutrition_category"
+
+    nc_id = Column(Integer, primary_key=True, index=True)
+    nc_name = Column(String(50), nullable=False)
+    nc_description = Column(Text, nullable=True)
+
+    nutritions = relationship("Nutrition", back_populates="nu_category")
+
 class FruitCategory(Base):
-    __tablename__ = "fruit_categories"
-
-    fruit_id = Column(Integer, ForeignKey("fruits.fruit_id", ondelete="CASCADE"), primary_key=True)
-    category_id = Column(Integer, ForeignKey("categories.category_id", ondelete="CASCADE"), primary_key=True)
+    __tablename__ = "fruit_category"
+    
+    category_id = Column(Integer, ForeignKey("category.category_id", ondelete="CASCADE"), primary_key=True)
+    fruit_id = Column(Integer, ForeignKey("fruit.fruit_id", ondelete="CASCADE"), primary_key=True)
 
 class FruitOrigin(Base):
     __tablename__ = "fruit_origin"
-
-    fruit_id = Column(Integer, ForeignKey("fruits.fruit_id", ondelete="CASCADE"), primary_key=True)
+    
     origin_id = Column(Integer, ForeignKey("origin.origin_id", ondelete="CASCADE"), primary_key=True)
+    fruit_id = Column(Integer, ForeignKey("fruit.fruit_id", ondelete="CASCADE"), primary_key=True)
 
 class Month(Base):
-    __tablename__ = "MONTH"
+    __tablename__ = "month"
     
-    MONTH_STT = Column(Integer, primary_key=True, index=True)
-    MONTH_Name = Column(String(10), nullable=False)
+    month_stt = Column(Integer, primary_key=True, index=True)
+    month_name = Column(String(10), nullable=False)
 
-    available_months = relationship("AvailableMonth", back_populates="month")
+    availabilities = relationship("Availability", secondary="available_month", back_populates="months")
+
+    __table_args__ = (
+        CheckConstraint('month_stt >= 1 AND month_stt <= 12'),
+    )
+
+class AvailableMonth(Base):
+    __tablename__ = "available_month"
+    
+    month_stt = Column(Integer, ForeignKey("month.month_stt"), primary_key=True)
+    availability_id = Column(Integer, ForeignKey("availability.availability_id"), primary_key=True)
+
+class NutritionUnit(Base):
+    __tablename__ = "nutrition_unit"
+
+    nu_id = Column(Integer, primary_key=True, index=True)
+    nu_name = Column(String(50), nullable=False)
+    nu_description = Column(Text, nullable=True)
+
+    nutritions = relationship("Nutrition", back_populates="unit")

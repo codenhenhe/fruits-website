@@ -185,44 +185,8 @@ export default function Header() {
           {/* Navigation with Dropdown */}
           <div className="flex justify-around">
             <nav className={styles.nav}>
-              {/* Dropdown cho Danh mục */}
-              <div className="relative group">
-                <Link href="#" className={`${styles.navLink} flex items-center`}>
-                  Danh mục
-                  <svg
-                    className="ml-1 h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </Link>
-                {/* Submenu */}
-                <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
-                  <Link
-                    href="/category/tropical"
-                    className="block px-4 py-2 text-gray-700 hover:bg-orange-100 rounded-t-lg"
-                  >
-                    Trái cây nhiệt đới
-                  </Link>
-                  <Link
-                    href="/category/citrus"
-                    className="block px-4 py-2 text-gray-700 hover:bg-orange-100"
-                  >
-                    Trái cây tụ
-                  </Link>
-                  <Link
-                    href="/category/berries"
-                    className="block px-4 py-2 text-gray-700 hover:bg-orange-100 rounded-b-lg"
-                  >
-                    Trái cây mọng
-                  </Link>
-                </div>
-              </div>
-
-              <Link href="#" className={styles.navLink}>
+              <Link href="/fruit-filter" className={styles.navLink}>Bộ lọc</Link>
+              <Link href="/about" className={styles.navLink}>
                 Giới thiệu
               </Link>
               <Link href="#" className={styles.navLink}>
