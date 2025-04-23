@@ -8,52 +8,83 @@ interface Fruit {
   fruit_name: string;
 }
 
-interface FruitResponse {
-  data: Fruit[];
-}
-
 export default function SearchBar() {
   const [query, setQuery] = useState("");
-  const [fruits, setFruits] = useState<FruitResponse | null>(null);
+  const [fruits, setFruits] = useState<Fruit[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isInputHovered, setIsInputHovered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Hàm gọi API tìm kiếm
+  const translationMap: { [key: string]: string } = {
+    "táo": "apple",
+    "bơ": "avocado",
+    "chuối": "banana",
+    "thanh long": "dragon_fruit",
+    "sầu riêng": "durian",
+    "ổi": "guava",
+    "mít": "jackfruit",
+    "bòn bon": "langsat",
+    "nhãn": "longan",
+    "xoài": "mango",
+    "măng cụt": "mangosteen",
+    "cam": "orange",
+    "lê": "pear",
+    "dứa": "pineapple",
+    "dâu": "rambai",
+    "chôm chôm": "rambutan",
+    "mận": "rose apple",
+    "dâu tây": "strawberry",
+    "mãng cầu": "sugar apple",
+    "dưa hấu": "watermelon",
+  };
+
+  const translateToEnglish = (vietnameseName: string): string => {
+    return translationMap[vietnameseName.toLowerCase()] || vietnameseName;
+  };
+
+  const translateToVietnamese = (englishName: string): string => {
+    const entry = Object.entries(translationMap).find(
+      ([vn, en]) => en.toLowerCase() === englishName.toLowerCase()
+    );
+    return entry ? entry[0] : englishName;
+  };
+
   const fetchFruits = async (searchQuery: string) => {
     try {
       setIsLoading(true);
+      const translatedQuery = translateToEnglish(searchQuery);
       const response = await axios.get("http://127.0.0.1:8000/fruits", {
-        params: { name: searchQuery },
+        params: { name: translatedQuery },
       });
-      setFruits(response.data);
+
+      // Kiểm tra nếu response.data là mảng
+      const data: Fruit[] = Array.isArray(response.data)
+        ? response.data
+        : response.data.data;
+
+      setFruits(data);
       setError(null);
     } catch (error: any) {
       console.error("Error fetching fruits:", error);
-      if (error.response) {
-        setError(error.response.data.detail || "Đã có lỗi xảy ra");
-        setFruits(null);
-      } else {
-        setError("Không thể kết nối đến server");
-        setFruits(null);
-      }
+      setError(
+        error?.response?.data?.detail || "Không thể kết nối đến server"
+      );
+      setFruits(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Sử dụng useEffect để gọi API mỗi khi query thay đổi
   useEffect(() => {
     if (query.trim() === "") {
       setFruits(null);
       setError(null);
-      setIsLoading(false);
       return;
     }
 
     const delayDebounce = setTimeout(() => {
       fetchFruits(query);
-    }, 300); // Tăng thời gian debounce lên 300ms
+    }, 300);
 
     return () => clearTimeout(delayDebounce);
   }, [query]);
@@ -63,16 +94,12 @@ export default function SearchBar() {
       <div className="flex items-center w-full relative">
         <div className="absolute mx-2 left-0 inset-y-0 flex items-center">
           <svg
-            className="w-4 h-4 text-gray-500 dark:text-gray-400"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4 text-gray-500"
             fill="none"
             viewBox="0 0 20 20"
           >
             <path
               stroke="currentColor"
-              strokeLinejoin="round"
-              strokeLinecap="round"
               strokeWidth="2"
               d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
             />
@@ -82,7 +109,7 @@ export default function SearchBar() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Enter fruit name..."
+          placeholder="Nhập tên trái cây..."
           onMouseEnter={() => setIsInputHovered(true)}
           onMouseLeave={() => setIsInputHovered(false)}
           onFocus={() => setIsInputHovered(true)}
@@ -94,11 +121,7 @@ export default function SearchBar() {
             onClick={() => setQuery("")}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-900 hover:bg-gray-300 rounded p-1"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              className="h-5 w-5 fill-current"
-            >
+            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
           </button>
@@ -110,40 +133,39 @@ export default function SearchBar() {
           !isInputHovered && query.trim() === "" ? "hidden" : "block"
         }`}
       >
-        {/* Mũi tên tam giác phía trên */}
         <div className="absolute -top-2 right-10 w-4 h-4 bg-white border-t border-l border-gray-300 transform rotate-45"></div>
 
-        {/* Tiêu đề với biểu tượng ngôi sao */}
         <div className="flex items-center p-2 border-b border-gray-200">
           <svg
-            xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             className="h-5 w-5 mr-2 text-yellow-500 fill-current"
           >
             <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 19.897l-7.334 3.868 1.4-8.168L.132 9.21l8.2-1.192L12 .587z" />
           </svg>
-          <span className="text-gray-700 font-semibold">What you are looking for?</span>
+          <span className="text-gray-700 font-semibold">Có phải bạn muốn tìm?</span>
         </div>
 
         {isLoading ? (
-          <p className="p-2 text-gray-600 animate-pulse">Searching...</p>
+          <p className="p-2 text-gray-600 animate-pulse">Đang tìm kiếm...</p>
         ) : error ? (
           <p className="p-2 text-red-500">{error}</p>
-        ) : fruits && fruits.data.length > 0 ? (
-          fruits.data.map((fruit) => (
+        ) : fruits && fruits.length > 0 ? (
+          fruits.map((fruit) => (
             <div
               key={fruit.fruit_id}
               className="p-2 border-b text-gray-600 border-gray-200 last:border-b-0 hover:bg-gray-100"
             >
               <Link href={`/fruit-detail/${fruit.fruit_id}`}>
-                <button className="w-full text-left">{fruit.fruit_name}</button>
+                <button className="w-full text-left">
+                  {translateToVietnamese(fruit.fruit_name)}
+                </button>
               </Link>
             </div>
           ))
         ) : query.trim() === "" ? (
-          <p className="p-2 text-gray-600">Enter fruit name to search.</p>
+          <p className="p-2 text-gray-600">Nhập tên trái cây để tìm kiếm.</p>
         ) : (
-          <p className="p-2 text-gray-600">No fruit found.</p>
+          <p className="p-2 text-gray-600">Không tìm thấy thông tin.</p>
         )}
       </div>
     </div>

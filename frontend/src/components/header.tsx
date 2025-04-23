@@ -5,6 +5,8 @@ import styles from "./header.module.css";
 import { useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 import SearchBar from "@/components/search_bar";
+// import { useTranslation } from "react-i18next";
+
 
 interface Fruit {
   id: number;
@@ -17,11 +19,13 @@ interface FruitDetection {
 }
 
 export default function Header() {
+  // const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [result, setResult] = useState<FruitDetection | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -182,16 +186,16 @@ export default function Header() {
             <SearchBar />
           </div>
 
-          {/* Navigation with Dropdown */}
+          {/* Navigation */}
           <div className="flex justify-around">
             <nav className={styles.nav}>
               <Link href="/fruit-filter" className={styles.navLink}>Bộ lọc</Link>
               <Link href="/about" className={styles.navLink}>
                 Giới thiệu
               </Link>
-              <Link href="#" className={styles.navLink}>
+              {/* <Link href="#" className={styles.navLink}>
                 Liên hệ
-              </Link>
+              </Link> */}
             </nav>
           </div>
         </div>

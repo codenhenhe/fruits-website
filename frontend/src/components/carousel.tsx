@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link"
 
 const carousels = [
-  { src: "/carousel_tropical_fruit.png", alt: "Trái cây nhiệt đới", title: "Trái cây nhiệt đới", slogan: "Bạn đã biết những gì về loại trái cây này?", href: "/category/tropical"},
-  { src: "/carousel_berry_2.jpg", alt: "Quả mọng (Berry)", title: "Quả mọng (Berry)", slogan: "Bạn đã biết những gì về loại trái cây này?", href: "/category/citrus"},
-  { src: "/carousel_aggregate.png", alt: "Quả tụ (Aggregate Fruit)", title: "Quả tụ (Aggregate Fruit)", slogan: "Bạn đã biết những gì về loại trái cây này?", href: "/category/berries"}
+  { src: "/carousel_tropical_fruit.png", alt: "Trái cây nhiệt đới", title: "Trái cây nhiệt đới", slogan: "Bạn đã biết những gì về loại trái cây này?", href: "/fruit-filter"},
+  { src: "/carousel_berry_2.jpg", alt: "Quả mọng (Berry)", title: "Quả mọng (Berry)", slogan: "Bạn đã biết những gì về loại trái cây này?", href: "/fruit-filter"},
+  { src: "/orange/orange1.jpg", alt: "Có múi (Citrus)", title: "Có múi (Citrus)", slogan: "Bạn đã biết những gì về loại trái cây này?", href: "/fruit-filter"}
 ];
 
 export default function Carousel() {

@@ -106,7 +106,7 @@ const resources = {
       "Orange": "Cam",
       "Pear": "Lê",
       "Pineapple": "Dứa",
-      "Rambai": "Răm bai",
+      "Rambai": "Dâu",
       "Rambutan": "Chôm chôm",
       "Rose apple": "Mận",
       "Strawberry": "Dâu tây",
@@ -136,6 +136,51 @@ const resources = {
       "Seeded": "Có hạt",
       "Seedless": "Không hạt",
       "High fiber": "Giàu chất xơ",
+
+      // Miền
+      "Northern": "Miền Bắc",
+      "Central": "Miền Trung",
+      "Southern": "Miền Nam",
+
+      "Rich in Vitamin C": "Giàu Vitamin C",
+      "High in Fiber": "Giàu chất xơ",
+      "Supports Heart Health": "Hỗ trợ sức khỏe tim mạch",
+      "Boosts Immunity": "Tăng cường hệ miễn dịch",
+      "Improves Digestion": "Cải thiện tiêu hóa",
+      "Antioxidant Properties": "Chống oxy hóa",
+      "Promotes Skin Health": "Tốt cho làn da",
+      "Aids Weight Loss": "Hỗ trợ giảm cân",
+
+      "Sweet and crisp fruit, commonly red or green, rich in fiber.": "Loại quả ngọt và giòn, thường có màu đỏ hoặc xanh, giàu chất xơ.",
+      "Creamy fruit high in healthy fats, often used in salads and guacamole.": "Quả mềm mịn chứa nhiều chất béo tốt, thường dùng trong salad và guacamole.",
+      "Soft, sweet fruit rich in potassium, commonly eaten fresh or in smoothies.": "Quả mềm, ngọt, giàu kali, thường ăn tươi hoặc dùng trong sinh tố.",
+      "Vibrant pink fruit with white or red flesh and tiny black seeds.": "Quả màu hồng rực rỡ với ruột trắng hoặc đỏ và hạt đen nhỏ.",
+      "Large spiky fruit with strong smell and creamy, rich taste.": "Quả lớn có gai với mùi mạnh và vị béo ngậy.",
+      "Round or oval fruit with green or yellow skin and pink or white flesh.": "Quả tròn hoặc bầu dục với vỏ màu xanh hoặc vàng và ruột màu hồng hoặc trắng.",
+      "Huge fruit with sweet yellow pods, used in both sweet and savory dishes.": "Quả rất lớn với múi vàng ngọt, dùng được cho món mặn và ngọt.",
+      "Small round fruit with translucent flesh and sweet-sour flavor.": "Quả tròn nhỏ với phần thịt trong và vị ngọt chua.",
+      "Small, juicy tropical fruit with translucent flesh and a single seed.": "Quả nhiệt đới nhỏ, mọng nước với ruột trong và một hạt duy nhất.",
+      "Sweet, juicy stone fruit popular worldwide in smoothies and desserts.": "Quả hạch ngọt và mọng nước, phổ biến trong sinh tố và món tráng miệng.",
+      "Purple rind fruit with white juicy segments, known as the “queen of fruits”.": "Quả có vỏ tím và múi trắng mọng nước, được mệnh danh là “nữ hoàng của các loại trái cây”.",
+      "Citrus fruit high in vitamin C, with a juicy and tangy-sweet taste.": "Loại quả có múi giàu vitamin C, vị ngọt dịu và chua nhẹ.",
+      "Mildly sweet fruit with a grainy texture, eaten fresh or in salads.": "Quả ngọt nhẹ với kết cấu hơi sần, ăn tươi hoặc trộn trong salad.",
+      "Tropical fruit with spiky skin and juicy yellow flesh, sweet and tart.": "Quả nhiệt đới có vỏ gai và ruột vàng mọng nước, vị ngọt và chua.",
+      "Tropical fruit with soft flesh and tangy taste, often eaten fresh.": "Quả nhiệt đới với phần thịt mềm và vị chua ngọt, thường ăn tươi.",
+      "Hairy red fruit with translucent flesh and sweet flavor.": "Quả đỏ có gai mềm với ruột trắng trong và vị ngọt.",
+      "Bell-shaped fruit with crisp texture and subtle rose-like flavor.": "Quả hình chuông với kết cấu giòn và hương vị nhẹ như hoa hồng.",
+      "Bright red, juicy berry with a sweet and slightly tart flavor.": "Quả mọng đỏ tươi, mọng nước với vị ngọt và hơi chua.",
+      "Knobby green fruit with soft sweet white pulp inside.": "Quả màu xanh có vỏ sần sùi với phần thịt trắng mềm ngọt bên trong.",
+      "Large fruit with green rind and red juicy flesh, perfect for summer.": "Quả lớn có vỏ xanh và ruột đỏ mọng nước, rất thích hợp cho mùa hè.",
+    
+      "Fiber": "Chất xơ",
+      "Vitamin C": "Vitamin C",
+      "Fat": "Chất béo",
+      "Potassium": "Kali",
+      "Calories": "Calo",
+      "Carbohydrates": "Carbohydrate",
+      "Vitamin A": "Vitamin A",
+      "Water": "Nước",
+
     },
   },
 };
@@ -144,8 +189,8 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: "vi", // Đặt ngôn ngữ mặc định là tiếng Việt
-    fallbackLng: "en", // Ngôn ngữ dự phòng
+    lng: "vi", 
+    fallbackLng: "en", 
     interpolation: {
       escapeValue: false,
     },

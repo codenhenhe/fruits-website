@@ -4,7 +4,6 @@ import "./globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import TranslationProvider from "../components/TranslationProvider";
-// import ThemeToggle from "@/components/themeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,17 +26,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="vi">
       <head>
         <link rel="icon" href="/favicon.png" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header />
-        {/* <ThemeToggle /> */}
-        <TranslationProvider>{children}</TranslationProvider>
-        <Footer />
+          <Header />
+          <TranslationProvider>{children}</TranslationProvider>
+          <Footer />
       </body>
     </html>
   );

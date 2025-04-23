@@ -48,7 +48,7 @@ export default function HotFruitsSection() {
                 <Image
                   src={fruit.image}
                   alt={fruit.name}
-                  layout="fill"
+                  fill
                   objectFit="cover"
                   className="transition-transform duration-300 hover:scale-110"
                 />

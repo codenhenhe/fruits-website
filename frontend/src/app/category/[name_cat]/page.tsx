@@ -1,21 +1,67 @@
-import CategoryPageClient from "./CategoryPageClient";
+// app/category/[name]/page.tsx
+import React from 'react'
 
-// Giả lập dữ liệu trái cây (có thể thay bằng API thật)
-const fruitData = [
-  { id: 1, name: "Chuối", image_url: "/banana_thum.jpg", category: "tropical" },
-  { id: 2, name: "Xoài", image_url: "/banana.jpg", category: "tropical" },
-  { id: 3, name: "Cam", image_url: "/banana.jpg", category: "citrus" },
-  { id: 5, name: "Dâu tây", image_url: "/banana.jpg", category: "berries" },
-];
+type Category = {
+  category_id: number
+  category_name: string
+  category_description?: string
+}
 
-// Server Component - Fetch dữ liệu từ server
-export default async function CategoryPage({ params }: { params: Promise<{ name_cat: string }> }) {
-  // Await params để lấy giá trị thực tế của name_cat
-  const { name_cat } = await params;
+type Fruit = {
+  fruit_id: number
+  fruit_name: string
+  fruit_scientificname: string
+  fruit_description?: string
+  categories: Category[]
+}
 
-  // Tìm trái cây theo danh mục
-  const filteredFruits = fruitData.filter((fruit) => fruit.category === name_cat);
+type Props = {
+  params: {
+    name: string
+  }
+}
 
-  // Truyền dữ liệu vào Client Component
-  return <CategoryPageClient fruits={filteredFruits} category={name_cat} />;
+async function getFruitsByCategory(name: string): Promise<Fruit[]> {
+  const res = await fetch(`http://localhost:8000/category?name=${encodeURIComponent(name)}`, {
+    cache: 'no-store',
+  })
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch data')
+  }
+
+  return res.json()
+}
+
+export default async function CategoryPage({ params }: Props) {
+  const name = params.name
+  let fruits: Fruit[] = []
+
+  try {
+    fruits = await getFruitsByCategory(name)
+  } catch (error) {
+    return <div className="p-4 text-red-600">Không tìm thấy trái cây nào cho loại "{name}".</div>
+  }
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Fruits in Category: {name}</h1>
+      {fruits.length === 0 ? (
+        <p>No fruits found.</p>
+      ) : (
+        <div className="space-y-4">
+          {fruits.map((fruit) => (
+            <div key={fruit.fruit_id} className="border rounded-lg p-4 shadow-sm">
+              <h2 className="text-xl font-semibold">{fruit.fruit_name}</h2>
+              <p className="italic text-gray-600">Scientific name: {fruit.fruit_scientificname}</p>
+              {fruit.fruit_description && <p className="mt-1">{fruit.fruit_description}</p>}
+              <p className="text-sm text-gray-500 mt-2">
+                Categories: {fruit.categories.map((cat) => cat.category_name).join(', ')}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }

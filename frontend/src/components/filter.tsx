@@ -126,7 +126,7 @@ export default function FruitFilter() {
               <option value="">{t("Select region")}</option>
               {Array.isArray(regions) && regions.map((r) => (
                 <option key={r} value={r}>
-                  {r}
+                  {t(r)}
                 </option>
               ))}
             </select>
@@ -143,7 +143,7 @@ export default function FruitFilter() {
               <option value="">{t("Select origin")}</option>
               {Array.isArray(origins) && origins.map((o) => (
                 <option key={o} value={o}>
-                  {o}
+                  {t(o)}
                 </option>
               ))}
             </select>
@@ -160,7 +160,7 @@ export default function FruitFilter() {
               <option value="">{t("Select benefit")}</option>
               {Array.isArray(benefits) && benefits.map((b) => (
                 <option key={b} value={b}>
-                  {b}
+                  {t(b)}
                 </option>
               ))}
             </select>
@@ -177,7 +177,7 @@ export default function FruitFilter() {
               <option value="">{t("Select category")}</option>
               {Array.isArray(categories) && categories.map((c) => (
                 <option key={c} value={c}>
-                  {c}
+                  {t(c)}
                 </option>
               ))}
             </select>
@@ -208,14 +208,14 @@ export default function FruitFilter() {
                 {fruits.data.map((fruit) => (
                   <Link key={fruit.fruit_id} href={`/fruit-detail/${fruit.fruit_id}`}>
                     <div className="p-4 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
-                      <p className="text-lg font-medium text-gray-800">{fruit.fruit_name}</p>
+                      <p className="text-lg font-medium text-gray-800">{t(fruit.fruit_name)}</p>
                     </div>
                   </Link>
                 ))}
               </div>
             ) : (
               <p className="text-gray-600">
-                {fruits.message ? t(fruits.message) : t("No fruits found.")}
+                {fruits.message ? t(fruits.message) : t("Không có thông tin.")}
               </p>
             )
           ) : null}

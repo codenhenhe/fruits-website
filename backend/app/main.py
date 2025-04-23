@@ -65,25 +65,7 @@ async def detect_fruit(file: UploadFile = File(...)):
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
-
-# @app.get("/origin/")
-# async def search_origins(id: int = None, db: AsyncSession = Depends(get_session)):
-#     try:
-#         query = select(Origin)
-#         logger.info(f"Querying with id: {id}")
-#         if id is not None:
-#             query = query.filter(Origin.origin_id == id)
-#         result = await db.execute(query)
-#         origins = result.scalars().all()
-#         logger.info(f"Found origins: {[o.to_dict() for o in origins]}")  # Log dữ liệu tìm thấy
-#         if not origins:
-#             raise HTTPException(status_code=404, detail="No origins found")
-#         return {"status": "success", "total": len(origins), "data": [origin.to_dict() for origin in origins]}
-#     except Exception as e:
-#         logger.error(f"Error: {str(e)}")
-#         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
+    return {"message": "Hi guy!"}
 
 @app.get("/fruits")
 async def search_fruits(name: str = "", db: AsyncSession = Depends(get_session)):
@@ -244,4 +226,55 @@ async def get_categories(db: AsyncSession = Depends(get_session)):
         return {"categories": categories} 
     except Exception as e:
         logger.error(f"Error in get_categories: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+  # Pydantic model cho Category
+class CategoryResponse(BaseModel):
+    category_id: int
+    category_name: str
+    category_description: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+# Pydantic model cho Fruit
+class FruitResponse(BaseModel):
+    fruit_id: int
+    fruit_name: str
+    fruit_scientificname: str
+    fruit_description: Optional[str]
+    categories: List[CategoryResponse]  # Sử dụng CategoryResponse thay vì dict
+
+    class Config:
+        orm_mode = True
+
+@app.get("/category", response_model=List[FruitResponse])
+async def get_fruit(name: Optional[str] = None, db: AsyncSession = Depends(get_session)):
+    try:
+        # Xây dựng query cơ bản
+        query = (
+            select(Fruit)
+            .options(
+                selectinload(Fruit.categories)  # Load mối quan hệ categories
+            )
+        )
+
+        # Nếu name được cung cấp, thêm join và filter
+        if name:
+            query = query.join(FruitCategory).join(Category).filter(
+                Category.category_name.ilike(f"%{name}%")
+            )
+
+        # Thực thi query
+        result = await db.execute(query)
+        fruits = result.scalars().unique().all()  # Lấy tất cả fruits, đảm bảo không trùng lặp
+
+        # Kiểm tra nếu không có fruit nào
+        if not fruits:
+            raise HTTPException(status_code=404, detail="No fruits found for the specified category")
+
+        # Trả về danh sách fruits
+        return fruits
+
+    except Exception as e:
+        logger.error(f"Error in get_fruit: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
