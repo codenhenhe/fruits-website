@@ -5,15 +5,15 @@ export default function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
-        {/* Cột 1: Thông tin trang web */}
+        
         <div className={styles.column}>
-          <h3 className={styles.title}>Fruit Facts</h3>
+          <h3 className={styles.title}>FruitFacts</h3>
           <p>Cùng khám phá những thông tin bổ ích về trái cây!</p>
           <p>Email: contact@fruitfacts.com</p>
           <p>Phone: +84 123 456 789</p>
         </div>
 
-        {/* Cột 2: Liên kết nhanh */}
+        
         <div className={styles.column}>
           <h3 className={styles.title}>Liên kết nhanh</h3>
           <Link href="/" className={styles.link}>
@@ -22,7 +22,7 @@ export default function Footer() {
           <Link href="/about" className={styles.link}>
             Giới thiệu
           </Link>
-          <Link href="/fruits" className={styles.link}>
+          <Link href="/fruit-filter" className={styles.link}>
             Các loại trái cây
           </Link>
           <Link href="/contact" className={styles.link}>
@@ -45,7 +45,7 @@ export default function Footer() {
         </div>
       </div>
       <div className={styles.bottom}>
-        <p>&copy; 2025 Fruit Facts. All rights reserved.</p>
+        <p>&copy; 2025 FruitFacts. All rights reserved.</p>
       </div>
     </footer>
   );

@@ -177,7 +177,7 @@ async def filter_fruits(
         if not fruits:
             return {
                 "data": [],
-                "message": "No fruits found matching the filters"
+                "message": "Không có trái cây nào."
             }
 
         return {"data": fruits}

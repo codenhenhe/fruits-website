@@ -1,11 +1,10 @@
 "use client";
 import Link from "next/link";
-import Image from "next/legacy/image";
+import Image from "next/image";
 import styles from "./header.module.css";
 import { useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 import SearchBar from "@/components/search_bar";
-// import { useTranslation } from "react-i18next";
 
 
 interface Fruit {
@@ -26,6 +25,30 @@ export default function Header() {
   const [result, setResult] = useState<FruitDetection | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const languageMap: { [key: string]: string } = {
+    "Apple": "Táo",
+    "Avocado": "Bơ",
+    "Banana": "Chuối",
+    "Dragon_fruit": "Thanh long",
+    "Durian": "Sầu riêng",
+    "Guava": "Ổi",
+    "Jackfruit": "Mít",
+    "Langsat": "Bòn bon",
+    "Longan": "Nhãn",
+    "Mango": "Xoài",
+    "Mangosteen": "Măng cụt",
+    "Orange": "Cam",
+    "Pear": "Lê",
+    "Pineapple": "Dứa",
+    "Rambai": "Dâu",
+    "Rambutan": "Chôm chôm",
+    "Rose_apple": "Mận",
+    "Strawberry": "Dâu tây",
+    "Sugar_apple": "Mãng cầu",
+    "Watermelon": "Dưa hấu",
+  }
+
+  const translateToVietnamese = (englishName: string) => { return languageMap[englishName] }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -67,9 +90,17 @@ export default function Header() {
         <div className={styles.container}>
           {/* Logo */}
           <div className={styles.logo}>
-            <Image src="/favicon.png" alt="Fruit Facts Logo" width={60} height={60} />
+            <Image
+              src="/favicon.png"
+              alt="Fruit Facts Logo"
+              width={60}
+              height={60}
+              style={{
+                maxWidth: "100%",
+                height: "auto"
+              }} />
             <Link href="/" className={styles.logoText}>
-              Fruit Facts
+              FruitFacts
             </Link>
           </div>
 
@@ -164,13 +195,13 @@ export default function Header() {
                                 className="block cursor-pointer"
                                 onClick={() => setIsModalOpen(false)}
                               >
-                                <span className="font-bold">{fruit.name}</span> -{" "}
+                                <span className="font-bold">{translateToVietnamese(fruit.name)}</span> -{" "}
                                 <span className="text-gray-600">
                                   {(fruit.confidence * 100).toFixed(2)}%
                                 </span>
                               </Link>
                               <div className="bg-gray-800 p-2 rounded-lg text-white w-48 -translate-x-1/2 absolute group-hover:block hidden left-1/2 mt-2 transform z-10 transition-opacity duration-200">
-                                <p>{fruit.name} là một loại quả ngon! Nhấn vào để xem thông tin chi tiết!</p>
+                                <p>{translateToVietnamese(fruit.name)} là một loại quả ngon! Nhấn vào để xem thông tin chi tiết!</p>
                               </div>
                             </li>
                           ))}
@@ -193,9 +224,6 @@ export default function Header() {
               <Link href="/about" className={styles.navLink}>
                 Giới thiệu
               </Link>
-              {/* <Link href="#" className={styles.navLink}>
-                Liên hệ
-              </Link> */}
             </nav>
           </div>
         </div>

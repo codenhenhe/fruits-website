@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Link from "next/link";
-import Image from "next/legacy/image";
+import Image from "next/image";
 import { useTranslation } from "react-i18next";
 
 interface Fruit {

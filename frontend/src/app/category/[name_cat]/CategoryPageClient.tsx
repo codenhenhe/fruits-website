@@ -1,7 +1,7 @@
 "use client"; // Chỉ định đây là Client Component
 
 import Link from "next/link";
-import Image from "next/legacy/image";
+import Image from "next/image";
 import { useState } from "react";
 
 // Định nghĩa interface
@@ -51,7 +51,10 @@ export default function CategoryPageClient({ fruits, category }: { fruits: Fruit
                   alt={fruit.name}
                   fill
                   className="object-cover"
-                />
+                  style={{
+                    maxWidth: "100%",
+                    height: "auto"
+                  }} />
               </div>
               <div className="p-4">
                 <h2 className="text-lg font-semibold text-gray-800">{fruit.name}</h2>

@@ -1,7 +1,7 @@
 // components/Banner.js
 "use client"
 import { useState, useEffect } from "react";
-import Image from "next/legacy/image";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link"
 
@@ -62,9 +62,12 @@ export default function Carousel() {
                 alt={carousels[currentIndex].alt}
                 width={500}
                 height={500}
-                objectFit="cover"
                 className="rounded-[10vw] w-full"
-              />
+                style={{
+                  maxWidth: "100%",
+                  height: "auto",
+                  objectFit: "cover"
+                }} />
             </div>
           </motion.div>
         </AnimatePresence>

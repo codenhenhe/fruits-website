@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Image from "next/legacy/image";
+import Image from "next/image";
 import { useTranslation } from "react-i18next";
 
 // Định nghĩa giao diện cho dữ liệu trái cây
@@ -101,7 +101,10 @@ export default function FruitsDetail({ params }: { params: Promise<{ fruitId: st
                 width={400}
                 height={300}
                 className="rounded-lg shadow-md object-cover transition-transform duration-300 hover:scale-105"
-              />
+                style={{
+                  maxWidth: "100%",
+                  height: "auto"
+                }} />
             </div>
           )}
 

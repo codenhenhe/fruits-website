@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/legacy/image";
+import Image from "next/image";
 import Carousel from "../components/carousel"
 const hotFruits = [
   {
@@ -48,10 +48,12 @@ export default function HotFruitsSection() {
                 <Image
                   src={fruit.image}
                   alt={fruit.name}
-                  fill
-                  objectFit="cover"
                   className="transition-transform duration-300 hover:scale-110"
-                />
+                  fill
+                  style={{
+                    maxWidth: "100%",
+                    objectFit: "cover"
+                  }} />
               </div>
 
               {/* Nội dung card */}
