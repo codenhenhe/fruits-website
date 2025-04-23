@@ -1,7 +1,7 @@
 // components/Banner.js
 "use client"
 import { useState, useEffect } from "react";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link"
 

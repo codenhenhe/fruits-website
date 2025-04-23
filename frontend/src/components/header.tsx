@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import styles from "./header.module.css";
 import { useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";

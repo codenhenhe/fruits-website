@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import { useTranslation } from "react-i18next";
 
 // Định nghĩa giao diện cho dữ liệu trái cây
