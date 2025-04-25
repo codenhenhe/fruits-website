@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, CheckConstraint, UniqueConstraint, DECIMAL
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, CheckConstraint, DECIMAL
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 

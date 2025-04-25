@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, File, UploadFile
 from .database import engine, get_session
-from .models import Base, Origin, Fruit, FruitImage, RegionInVietnam, Availability, Category, Benefit, FruitBenefit, Nutrition, NutritionCategory, FruitCategory, FruitOrigin, Month, AvailableMonth, NutritionUnit
+from .models import Base, Origin, Fruit, RegionInVietnam, Availability, Category, Benefit, FruitBenefit, Nutrition, FruitCategory, FruitOrigin
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,7 +21,7 @@ app = FastAPI()
 # Thêm middleware CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Cho phép Next.js truy cập
+    allow_origins=["http://localhost:3000"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -81,20 +81,6 @@ async def search_fruits(name: str = "", db: AsyncSession = Depends(get_session))
     except Exception as e:
         logger.error(f"Error in search_fruits: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-# @app.get("/categories")
-# async def search_fruits(category_id: Optional[int] = None, db: AsyncSession = Depends(get_session)):
-#     try:
-#         query = select(Category)
-#         if category_id:
-#             query = query.filter(Category.category_id == category_id)
-
-#         result = await db.execute(query)
-#         cate = result.scalars().all()
-#         return {"categories": cate}
-#     except Exception as e:
-#         logger.error(f"Error in search_categories: {str(e)}")
-#         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 @app.get("/get-fruit-info", response_model=FruitResponse)
 async def get_fruit(id: Optional[int] = None, db: AsyncSession = Depends(get_session)):

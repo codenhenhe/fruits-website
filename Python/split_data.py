@@ -1,7 +1,8 @@
+# Chia và di chuyển dữ liệu theo tỷ lệ train:test:val = 8:1:1
+
 import os
 import shutil
 import supervision as sv
-from collections import defaultdict
 
 # Đường dẫn gốc chứa dữ liệu ban đầu
 dataset_path = "Dataset"
@@ -15,14 +16,12 @@ for split in split_dirs:
     os.makedirs(os.path.join(dataset_path, split, "labels"), exist_ok=True)
 
 # Tải dataset với supervision
-# classes = [str(i) for i in range(20)]  # 20 lớp: ["0", "1", ..., "19"]
 dataset = sv.DetectionDataset.from_yolo(
     images_directory_path=image_dir,
     annotations_directory_path=label_dir,
     data_yaml_path=f"data.yaml",
 )
 
-# Chia dữ liệu với supervision
 train_dataset, val_test_dataset = dataset.split(
     split_ratio=0.8,
     random_state=42,
